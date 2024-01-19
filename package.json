@@ -1,5 +1,5 @@
 {
-  "name": "rchari",
+  "name": "redis-connector-nodejs",
   "version": "1.0.0",
   "description": "Redis connector to perform outbound integration from your Camunda 8 platform. Supports JSON data format.",
   "main": "dist/index.js",
