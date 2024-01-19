@@ -1,0 +1,25 @@
+{
+  "name": "rchari",
+  "version": "1.0.0",
+  "description": "Redis connector to perform outbound integration from your Camunda 8 platform. Supports JSON data format.",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc --project tsconfig.build.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rchari-ml/redis-connector-nodejs.git"
+  },
+  "keywords": [],
+  "author": "rchari",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rchari-ml/redis-connector-nodejs/issues"
+  },
+  "homepage": "https://github.com/rchari-ml/redis-connector-nodejs#readme",
+  "dependencies": {
+    "camunda-connector-sdk": "^1.0.6"
+  },
+  "devDependencies": {}
+}
