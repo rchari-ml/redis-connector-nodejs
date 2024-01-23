@@ -125,7 +125,8 @@
     }, {
       "name" : "PUT",
       "value" : "PUT"
-    } ]
+    } ], 
+    "value" : "GET"
   }, {
     "id" : "key",
     "label" : "Key",
@@ -139,7 +140,8 @@
       "name" : "key",
       "type" : "zeebe:input"
     },
-    "type" : "Text"
+    "type" : "Text",
+    "value": "makelabs"
   }, {
     "id" : "resultVariable",
     "label" : "Result variable",
@@ -149,7 +151,8 @@
       "key" : "resultVariable",
       "type" : "zeebe:taskHeader"
     },
-    "type" : "String"
+    "type" : "String",
+    "value": "jsonOutput"
   }, {
     "id" : "resultExpression",
     "label" : "Result expression",
