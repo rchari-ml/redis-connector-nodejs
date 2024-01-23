@@ -4,9 +4,9 @@ import { ConnectorRequest } from "../dto/ConnectorRequest"
 @OutboundConnector( { 
     name : "RedisConnectorNodeJS", 
     type : "io.camunda:redis-connector-nodejs:1",
-    inputVariables : [ "authentication", "operationType", "key" ]
+    inputVariables : [ "hostname", "port", "user", "token", "operationType", "key" ]
 } )
-export class RedisConnector implements OutboundConnectorFunction {
+export class Connector implements OutboundConnectorFunction {
     async execute(context: OutboundConnectorContext) {
         const req = context.getVariablesAsType(ConnectorRequest)
         context.replaceSecrets(req)
@@ -15,7 +15,7 @@ export class RedisConnector implements OutboundConnectorFunction {
 
     async makeCall(req: ConnectorRequest) {
         const baseUrl = `redis://`
-        const urlString = `${baseUrl}${req.authentication.user}:${req.authentication.token}@${req.authentication.hostname}:${req.authentication.port}`
+        const urlString = `${baseUrl}${req.user}:${req.token}@${req.hostname}:${req.port}`
         try {
             console.log(urlString);
             return {

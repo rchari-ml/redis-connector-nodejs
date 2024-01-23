@@ -4,7 +4,7 @@ export { OutboundConnectorContext } from "./outbound-context";
 export { OutboundConnector, OutboundConnectorFunction, getOutboundConnectorDescription } from "./outbound";
 export { Secret, ReplaceSecretImplementation } from "./secret";
 
-export { RedisConnector } from "./lib/RedisConnector"
+export { Connector } from "./lib/RedisConnector"
 
 //Below code is failing during npm install step
 //import { WorkerConnectorRuntime } from "camunda-connector-worker-runtime";

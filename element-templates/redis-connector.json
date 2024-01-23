@@ -36,7 +36,7 @@
     },
     "type" : "Hidden"
   }, {
-    "id" : "authentication.hostname",
+    "id" : "hostname",
     "label" : "Hostname",
     "description" : "Host server name, preferably FQDN",
     "optional" : false,
@@ -44,15 +44,15 @@
       "notEmpty" : true
     },
     "feel" : "optional",
-    "group" : "authentication",
+    "group" : "compose",
     "binding" : {
-      "name" : "authentication.hostname",
+      "name" : "hostname",
       "type" : "zeebe:input"
     },
     "type" : "String",
-    "value": "=\"secrets.REDIS_HOSTNAME\""
+    "value": "hostname-fqdn"
   }, {
-    "id" : "authentication.port",
+    "id" : "port",
     "label" : "Port",
     "description" : "Port number",
     "optional" : false,
@@ -64,15 +64,15 @@
       }
     },
     "feel" : "optional",
-    "group" : "authentication",
+    "group" : "compose",
     "binding" : {
-      "name" : "authentication.port",
+      "name" : "port",
       "type" : "zeebe:input"
     },
     "type" : "String",
-    "value": "=\"secrets.REDIS_PORT\""
+    "value": "11485"
   }, {
-    "id" : "authentication.user",
+    "id" : "user",
     "label" : "Username",
     "description" : "The username for authentication",
     "optional" : false,
@@ -80,15 +80,15 @@
       "notEmpty" : true
     },
     "feel" : "optional",
-    "group" : "authentication",
+    "group" : "compose",
     "binding" : {
-      "name" : "authentication.user",
+      "name" : "user",
       "type" : "zeebe:input"
     },
     "type" : "String",
-    "value": "=\"secrets.REDIS_USER\""
+    "value": "uname"
   }, {
-    "id" : "authentication.token",
+    "id" : "token",
     "label" : "Token",
     "description" : "The token or password for authentication",
     "optional" : false,
@@ -96,9 +96,9 @@
       "notEmpty" : true
     },
     "feel" : "optional",
-    "group" : "authentication",
+    "group" : "compose",
     "binding" : {
-      "name" : "authentication.token",
+      "name" : "token",
       "type" : "zeebe:input"
     },
     "type" : "String",
