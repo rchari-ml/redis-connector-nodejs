@@ -9,10 +9,7 @@
     "id" : "connectors",
     "name" : "Connectors"
   },
-  "appliesTo" : [ "bpmn:Task" ],
-  "elementType" : {
-    "value" : "bpmn:ServiceTask"
-  },
+  "appliesTo" : [ "bpmn:ServiceTask" ],
   "groups" : [ {
     "id" : "authentication",
     "label" : "Authentication"
@@ -152,7 +149,7 @@
       "type" : "zeebe:taskHeader"
     },
     "type" : "String",
-    "value": "jsonOutput"
+    "value": "jsonData"
   }, {
     "id" : "resultExpression",
     "label" : "Result expression",
