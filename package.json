@@ -1,6 +1,6 @@
 {
   "name": "redis-connector-nodejs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Redis connector to perform outbound integration from your Camunda 8 platform. Supports JSON data format.",
   "main": "dist/index.js",
   "scripts": {
