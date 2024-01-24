@@ -65,7 +65,11 @@ test('OutboundConnectorContext.replaceSecrets replaces secrets from environment 
     const v = context.getVariablesAsType(ConnectorRequest)
     context.replaceSecrets(v)
 
+    // make sure env var is set properly
+    expect(process.env.REDIS_SECRET).toEqual("ask-me-for-this")
     expect(v.token).toEqual("ask-me-for-this")
+
+    expect(v.key).toEqual("name")
     
 })
 
