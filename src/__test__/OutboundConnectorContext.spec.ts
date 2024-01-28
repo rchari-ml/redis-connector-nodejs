@@ -21,6 +21,7 @@ const __H__ = process.env.REDIS_HOSTNAME   ? process.env.REDIS_HOSTNAME : "somet
 const __P__ = process.env.REDIS_PORT       ? process.env.REDIS_PORT     : "something-is-fishy-p";
 const __U__ = process.env.REDIS_USER       ? process.env.REDIS_USER     : "something-is-fishy-u";
 const __S__ = process.env.REDIS_SECRET     ? process.env.REDIS_SECRET   : "something-is-fishy-s";
+const __SDUMMY__ = process.env.REDIS_SECRET_DUMMY      ? process.env.REDIS_SECRET_DUMMY   : "something-is-fishy-sd";
 
 test('OutboundConnectorContext.validate will throw if a required variable is missing', () => {
     
@@ -58,7 +59,7 @@ test('OutboundConnectorContext.replaceSecrets replaces secrets from environment 
                         hostname: __H__,
                         port: __P__,
                         user: __U__,
-                        token: "secrets.REDIS_SECRET" ,
+                        token: "secrets.REDIS_SECRET_DUMMY" ,
                         operationType: "GET", 
                         key: "name"                        
                 } );
@@ -66,7 +67,7 @@ test('OutboundConnectorContext.replaceSecrets replaces secrets from environment 
     context.replaceSecrets(v)
 
     // make sure env var is set properly
-    expect(process.env.REDIS_SECRET).toEqual("ask-me-for-this")
+    expect(process.env.REDIS_SECRET_DUMMY).toEqual("ask-me-for-this")
     expect(v.token).toEqual("ask-me-for-this")
 
     expect(v.key).toEqual("name")
