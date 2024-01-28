@@ -9,6 +9,7 @@ const __H__ = process.env.REDIS_HOSTNAME   ? process.env.REDIS_HOSTNAME : "somet
 const __P__ = process.env.REDIS_PORT       ? process.env.REDIS_PORT     : "something-is-fishy-p";
 const __U__ = process.env.REDIS_USER       ? process.env.REDIS_USER     : "something-is-fishy-u";
 const __S__ = process.env.REDIS_SECRET     ? process.env.REDIS_SECRET   : "something-is-fishy-s";
+const __SDUMMY__ = process.env.REDIS_SECRET_DUMMY      ? process.env.REDIS_SECRET_DUMMY   : "something-is-fishy-sd";
 
 function sleep(ms : any) {
     return new Promise((resolve) => {
@@ -58,4 +59,68 @@ test('getOperationForNoDataAsKey correctly retrieves null as output', async () =
             let o = await connector.execute( context );
             expect( o ).toEqual( { status: 'nodata', message: 'nodata for the given key', data: {} } );
             
+}, 10000 ) // end of test
+
+
+test('connectorInvalidPassword returns an error', async () => {
+            
+
+  const connector = new Connector();
+  const context = new OutboundConnectorContext({});
+
+  if (false) console.log(process.env);
+
+  context.setVariables(
+              {   
+                  hostname: __H__,
+                  port: __P__,
+                  user: __U__,
+                  token: __SDUMMY__ , 
+                  operationType: "GET", 
+                  key: "no-data"
+              } );
+  const v = context.getVariablesAsType(ConnectorRequest);
+  context.replaceSecrets(v);
+  context.validate(v)  ;
+
+  let o = await connector.execute( context );
+  expect( o.status  ).toEqual( 'error' );
+  expect( o.message )
+        .toContain( 'Runtime error while creating connection' );
+  expect( o.message )
+        .toContain( 'WRONGPASS' );
+  expect( o.data    ).toEqual( {}  );
+  
+}, 10000 ) // end of test
+
+
+test('connectorInvalidHostname returns an error', async () => {
+            
+
+  const connector = new Connector();
+  const context = new OutboundConnectorContext({});
+
+  if (false) console.log(process.env);
+
+  context.setVariables(
+              {   
+                  hostname: "invalid" + __H__,
+                  port: __P__,
+                  user: __U__,
+                  token: __SDUMMY__ , 
+                  operationType: "GET", 
+                  key: "no-data"
+              } );
+  const v = context.getVariablesAsType(ConnectorRequest);
+  context.replaceSecrets(v);
+  context.validate(v)  ;
+
+  let o = await connector.execute( context );
+  expect( o.status  ).toEqual( 'error' );
+  expect( o.message )
+        .toContain( 'Runtime error while creating connection' );
+  expect( o.message )
+        .toContain( 'ENOTFOUND' );
+  expect( o.data    ).toEqual( {}  );
+  
 }, 10000 ) // end of test
