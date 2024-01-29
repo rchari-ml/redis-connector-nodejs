@@ -18,7 +18,7 @@ test('getOutboundConnectorDescription correctly retrieves Connector metadata', (
     expect(md.type).toEqual('io.camunda:redis-connector-nodejs:1')
     
     expect(Array.isArray(md.inputVariables)).toBe(true)
-    expect(md.inputVariables?.length).toBe(6)
+    expect(md.inputVariables?.length).toBe(7)
     
     expect(md.inputVariables?.includes('hostname')).toBe(true)
     expect(md.inputVariables?.includes('port')).toBe(true)

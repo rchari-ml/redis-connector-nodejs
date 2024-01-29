@@ -14,6 +14,20 @@ export class Connector implements OutboundConnectorFunction {
     // Redis related stuff goes here
     redisClient : any;
 
+    static readonly STATUS_SUCCESS : string = 'success';
+    static readonly STATUS_ERROR   : string = 'error';
+    static readonly STATUS_NODATA  : string = 'nodata';
+    static readonly STATUS_EXISTS  : string = 'exists';
+
+    static readonly MESSAGE_SUCCESS : string = 'success';
+    static readonly MESSAGE_METHOD_LEVEL_ERROR  : string = 'Runtime error while handling operation ';            
+    static readonly C1 = 'Invoke operation - ';
+    static readonly LOG_IN_METHOD_GET           : string = Connector.C1 + 'get ';
+    static readonly LOG_IN_METHOD_PUT           : string = Connector.C1 + 'put ';
+    static readonly LOG_IN_METHOD_DELETE        : string = Connector.C1 + 'del ';
+    static readonly LOG_IN_METHOD_CONN_HANDLER  : string = 'Ten20 Redis - client ';
+    static readonly LOG_IN_METHOD_MAKE_CALL     : string = Connector.C1 + 'makeCall ';
+
     constructor() {
         console.log("Outbound Connector - constructor");
     }
@@ -21,10 +35,10 @@ export class Connector implements OutboundConnectorFunction {
     public async getRedisClient( urlString : string )  {        
 
         this.redisClient = await createClient( { url : urlString } )
-                        .on('error',        err => { console.log('Ten20 Redis - connection error seen - ' + err); throw new Error('Ten20 Redis - connection error seen - ' + err); }    )
-                        .on('connect',      ()  => console.log('Ten20 Redis - successfully connected'+'\n')        )
-                        .on('reconnecting', ()  => console.log('Ten20 Redis - client reconnecting')                )
-                        .on('ready',        ()  => console.log('Ten20 Redis - client is ready to serve requests' ) )
+                        .on('error',        err => { console.log(Connector.LOG_IN_METHOD_CONN_HANDLER + 'connection error seen - ' + err); throw new Error('Ten20 Redis - connection error seen - ' + err); }    )
+                        .on('connect',      ()  =>   console.log(Connector.LOG_IN_METHOD_CONN_HANDLER + 'successfully connected'+'\n')        )
+                        .on('reconnecting', ()  =>   console.log(Connector.LOG_IN_METHOD_CONN_HANDLER + 'reconnecting')                )
+                        .on('ready',        ()  =>   console.log(Connector.LOG_IN_METHOD_CONN_HANDLER + 'is ready to serve requests' ) )
                         .connect();
 
         return this.redisClient
@@ -50,7 +64,7 @@ export class Connector implements OutboundConnectorFunction {
             const baseUrl = `redis://`
             const urlString = `${baseUrl}${req.user}:${req.token}@${req.hostname}:${req.port}`                
             
-            console.log('makeCall - get redis client');
+            console.log(Connector.LOG_IN_METHOD_MAKE_CALL + 'get redis client');
             c = await this.getRedisClient( urlString );
 
             switch ( req.operationType ){
@@ -65,15 +79,15 @@ export class Connector implements OutboundConnectorFunction {
             }
 
         } catch( e : any ){
-            console.log('makeCall - connection related error ', e);
+            console.log(Connector.LOG_IN_METHOD_MAKE_CALL + 'connection related error ', e);
             return { 
-                status  : 'error',
+                status  : Connector.STATUS_ERROR,
                 message : 'Runtime error while creating connection with req params ' + e,
                 data    : {}
             }            
         }
         finally{
-            console.log('makeCall - release redis client resource');
+            console.log(Connector.LOG_IN_METHOD_MAKE_CALL + 'release redis client resource');
             if (c !== null) await c.disconnect();
             c = null;
         }           
@@ -85,26 +99,25 @@ export class Connector implements OutboundConnectorFunction {
 
             try {
 
-                console.log('Invoke get operation - invoke json get api operation');
+                console.log(Connector.LOG_IN_METHOD_GET + 'invoke json get api operation');
                 m = await conn
                 .json
                 .get(  req.key, { path: '.'} )
                 .then( ( output : any) => {
     
                         // format output data and return 
-                        console.log('Invoke get operation - validate api response');
                         if (  output != null) {
-                            console.log('Invoke get operation - return data with success');
+
                             return { 
-                                status  : 'success',
-                                message : 'success',
+                                status  : Connector.STATUS_SUCCESS,
+                                message : Connector.MESSAGE_SUCCESS,
                                 data    : output
                             };
                         }
                         else {
-                            console.log('Invoke get operation - return nodata');
+                            console.log(Connector.LOG_IN_METHOD_GET + 'return nodata');
                             return { 
-                                status  : 'nodata',
+                                status  : Connector.STATUS_NODATA,
                                 message : 'nodata for the given key',
                                 data    : {}
                             };
@@ -114,10 +127,10 @@ export class Connector implements OutboundConnectorFunction {
                     console.log(m); return m;
             } 
             catch(err : any) {
-                console.log('Invoke get operation - return error');
+                console.log(Connector.LOG_IN_METHOD_GET + 'return error');
                 return { 
-                    status  : 'error',
-                    message : 'Runtime error while retrieving data ' + err,
+                    status  : Connector.STATUS_ERROR,
+                    message : Connector.MESSAGE_METHOD_LEVEL_ERROR + ' get ' + err,
                     data    : {}
                 };
             }
@@ -133,7 +146,7 @@ export class Connector implements OutboundConnectorFunction {
         try {
             data = (req.data === null || req.data === '') ? JSON.parse('{}') : JSON.parse(req.data); 
 
-            console.log('Invoke put operation - invoke json put api operation to create new record');
+            console.log( 'invoke json put api operation to create new record');
             m = await conn
             .json
             .set(   req.key, 
@@ -146,26 +159,24 @@ export class Connector implements OutboundConnectorFunction {
             .then( ( output : any) => {
 
                     // format output data and return 
-                    console.log('Invoke put operation - validate api response');
                     if (  output != null) {
-                        console.log('Invoke put operation - return data with success');
                         return { 
-                            status  : 'success',
-                            message : 'success',
+                            status  : Connector.STATUS_SUCCESS,
+                            message : Connector.MESSAGE_SUCCESS,
                             data    : output
                         };
                     }
                     else {
-                        console.log('Invoke put operation - api call returned null - try updating existing record');
+                        console.log(Connector.LOG_IN_METHOD_PUT + 'api call returned null - try updating existing record');
                         return { 
-                            status  : 'exists',
+                            status  : Connector.STATUS_EXISTS,
                             message : 'api call returned null value',
                             data    : {}
                         };
                     }
                 });
 
-                if ( m.status === 'exists' ){
+                if ( m.status === Connector.STATUS_EXISTS ){
                         // hmm lets update existing record
                         m = await conn
                         .json
@@ -179,19 +190,17 @@ export class Connector implements OutboundConnectorFunction {
                         .then( ( output : any) => {
             
                                 // format output data and return 
-                                console.log('Invoke put operation - validate api response');
                                 if (  output != null) {
-                                    console.log('Invoke put operation - return data with success');
                                     return { 
-                                        status  : 'success',
-                                        message : 'success',
+                                        status  : Connector.STATUS_SUCCESS,
+                                        message : Connector.MESSAGE_SUCCESS,
                                         data    : output
                                     };
                                 }
                                 else {
-                                    console.log('Invoke put operation - api call returned null - send back as is');
+                                    console.log(Connector.LOG_IN_METHOD_PUT + 'api call returned null - send back as is');
                                     return { 
-                                        status  : 'success',
+                                        status  : Connector.STATUS_SUCCESS,
                                         message : 'api call XX:true returned null value',
                                         data    : {}
                                     };
@@ -202,10 +211,10 @@ export class Connector implements OutboundConnectorFunction {
                 return m;
         } 
         catch(err : any) {
-            console.log('Invoke put operation - return error');
+            console.log(Connector.LOG_IN_METHOD_PUT + 'return error');
             return { 
-                status  : 'error',
-                message : 'Runtime error while writing data ' + err,
+                status  : Connector.STATUS_ERROR,
+                message : Connector.MESSAGE_METHOD_LEVEL_ERROR + ' put ' + err,
                 data    : {}
             };
         }
@@ -217,26 +226,24 @@ export class Connector implements OutboundConnectorFunction {
 
         try {
 
-            console.log('Invoke del operation - invoke json api operation');
             m = await conn
             .json
             .del(  req.key )
             .then( ( output : any) => {
 
                     // format output data and return 
-                    console.log('Invoke del operation - validate api response');
                     if (  output != null) {
-                        console.log('Invoke del operation - return data with success');
+
                         return { 
-                            status  : 'success',
-                            message : 'success',
+                            status  : Connector.STATUS_SUCCESS,
+                            message : Connector.MESSAGE_SUCCESS,
                             data    : output
                         };
                     }
                     else {
-                        console.log('Invoke del operation - api returned null response');
+                        console.log(Connector.LOG_IN_METHOD_DELETE + 'api returned null response');
                         return { 
-                            status  : 'nodata',
+                            status  : Connector.STATUS_NODATA,
                             message : 'nodata for the given key',
                             data    : {}
                         };
@@ -246,10 +253,10 @@ export class Connector implements OutboundConnectorFunction {
                 console.log(m); return m;
         } 
         catch(err : any) {
-            console.log('Invoke del operation - return error');
+            console.log(Connector.LOG_IN_METHOD_DELETE + 'return error');
             return { 
-                status  : 'error',
-                message : 'Runtime error while handling del operation ' + err,
+                status  : Connector.STATUS_ERROR,
+                message : Connector.MESSAGE_METHOD_LEVEL_ERROR + ' del ' + err,
                 data    : {}
             };
         }
