@@ -1,0 +1,6 @@
+{
+    "sonarlint.connectedMode.project": {
+        "connectionId": "makelabs-in",
+        "projectKey": "rchari-ml_redis-connector-nodejs"
+    }
+}

@@ -131,3 +131,5 @@ dist
 src/.DS_Store
 .scannerwork/.sonar_lock
 .scannerwork/report-task.txt
+yarn.lock
+.scannerwork/
