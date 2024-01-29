@@ -7,7 +7,7 @@ require('dotenv').config();
 @OutboundConnector( { 
     name : "RedisConnectorNodeJS", 
     type : "io.camunda:redis-connector-nodejs:1",
-    inputVariables : [ "hostname", "port", "user", "token", "operationType", "key" ]
+    inputVariables : [ "hostname", "port", "user", "token", "operationType", "key", "data" ]
 } )
 export class Connector implements OutboundConnectorFunction {
 
@@ -53,7 +53,16 @@ export class Connector implements OutboundConnectorFunction {
             console.log('makeCall - get redis client');
             c = await this.getRedisClient( urlString );
 
-            return await this.invokeGetOperation( c, req );
+            switch ( req.operationType ){
+                case 'GET': 
+                            return await this.invokeGetOperation( c, req );
+
+                case 'PUT':
+                            return await this.invokePutOperation( c, req );
+
+                case 'DELETE':
+                            return await this.invokeDeleteOperation( c, req );
+            }
 
         } catch( e : any ){
             console.log('makeCall - connection related error ', e);
@@ -112,6 +121,138 @@ export class Connector implements OutboundConnectorFunction {
                     data    : {}
                 };
             }
+
+    } // end of method
+
+    async invokePutOperation( conn : any, req : ConnectorRequest ) {
+
+        let data = null, expiry = null; //  message to write to the db with optional expiry
+        let m = null;    //  response message 
+        const C_VALUE_PATH_ROOT = "$";
+
+        try {
+            data = (req.data === null || req.data === '') ? JSON.parse('{}') : JSON.parse(req.data); 
+
+            console.log('Invoke put operation - invoke json put api operation to create new record');
+            m = await conn
+            .json
+            .set(   req.key, 
+                    C_VALUE_PATH_ROOT ,
+                    data,
+                    {   "NX" : true, // create only new records. if key already exists, then api returns null.
+                        "EX" :  -1
+                    } 
+                )
+            .then( ( output : any) => {
+
+                    // format output data and return 
+                    console.log('Invoke put operation - validate api response');
+                    if (  output != null) {
+                        console.log('Invoke put operation - return data with success');
+                        return { 
+                            status  : 'success',
+                            message : 'success',
+                            data    : output
+                        };
+                    }
+                    else {
+                        console.log('Invoke put operation - api call returned null - try updating existing record');
+                        return { 
+                            status  : 'exists',
+                            message : 'api call returned null value',
+                            data    : {}
+                        };
+                    }
+                });
+
+                if ( m.status === 'exists' ){
+                        // hmm lets update existing record
+                        m = await conn
+                        .json
+                        .set(   req.key, 
+                                C_VALUE_PATH_ROOT,
+                                data,
+                                {   "XX" : true, // update existing record.
+                                    "EX" :  -1
+                                }
+                            )
+                        .then( ( output : any) => {
+            
+                                // format output data and return 
+                                console.log('Invoke put operation - validate api response');
+                                if (  output != null) {
+                                    console.log('Invoke put operation - return data with success');
+                                    return { 
+                                        status  : 'success',
+                                        message : 'success',
+                                        data    : output
+                                    };
+                                }
+                                else {
+                                    console.log('Invoke put operation - api call returned null - send back as is');
+                                    return { 
+                                        status  : 'success',
+                                        message : 'api call XX:true returned null value',
+                                        data    : {}
+                                    };
+                                }
+                            })                
+                } // end of check for updating existing record
+
+                return m;
+        } 
+        catch(err : any) {
+            console.log('Invoke put operation - return error');
+            return { 
+                status  : 'error',
+                message : 'Runtime error while writing data ' + err,
+                data    : {}
+            };
+        }
+    } // end of put method definition
+
+    async invokeDeleteOperation( conn : any, req : ConnectorRequest ) {
+        
+        let m = null; //  message output
+
+        try {
+
+            console.log('Invoke del operation - invoke json api operation');
+            m = await conn
+            .json
+            .del(  req.key )
+            .then( ( output : any) => {
+
+                    // format output data and return 
+                    console.log('Invoke del operation - validate api response');
+                    if (  output != null) {
+                        console.log('Invoke del operation - return data with success');
+                        return { 
+                            status  : 'success',
+                            message : 'success',
+                            data    : output
+                        };
+                    }
+                    else {
+                        console.log('Invoke del operation - api returned null response');
+                        return { 
+                            status  : 'nodata',
+                            message : 'nodata for the given key',
+                            data    : {}
+                        };
+                    }
+                })
+
+                console.log(m); return m;
+        } 
+        catch(err : any) {
+            console.log('Invoke del operation - return error');
+            return { 
+                status  : 'error',
+                message : 'Runtime error while handling del operation ' + err,
+                data    : {}
+            };
+        }
 
     } // end of method
 

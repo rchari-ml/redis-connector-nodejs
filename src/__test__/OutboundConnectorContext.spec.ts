@@ -5,7 +5,7 @@ import {Secret, OutboundConnector, OutboundConnectorFunction, OutboundConnectorC
 @OutboundConnector({
     name : "RedisConnectorNodeJS", 
     type : "io.camunda:redis-connector-nodejs:1",
-    inputVariables : [ "hostname", "port", "user", "token", "operationType", "key" ]    
+    inputVariables : [ "hostname", "port", "user", "token", "operationType", "key", "data" ]
 })
 class MyFunction implements OutboundConnectorFunction {
     execute(context: OutboundConnectorContext) {
