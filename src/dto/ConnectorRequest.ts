@@ -12,4 +12,6 @@ export class ConnectorRequest {
     @NotNull operationType!: string;
     @NotNull key!: string;
 
+    data!: any;
+
 }
