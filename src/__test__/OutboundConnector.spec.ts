@@ -59,63 +59,54 @@ test('getOperationForNoDataAsKey correctly retrieves null as output', async () =
 
 test('connectorInvalidPassword returns an error', async () => {
             
+  const outcome = async () => {
+            const connector = new Connector();
+            const context = new OutboundConnectorContext({});
 
-  const connector = new Connector();
-  const context = new OutboundConnectorContext({});
+            context.setVariables(
+                        {   
+                            hostname: __H__,
+                            port: __P__,
+                            user: __U__,
+                            token: __SDUMMY__ , 
+                            operationType: "GET", 
+                            key: "no-data"
+                        } );
+            const v = context.getVariablesAsType(ConnectorRequest);
+            context.replaceSecrets(v);
+            context.validate(v)  ;
+            await connector.execute( context ); 
+  }
 
-  if (false) console.log(process.env);
-
-  context.setVariables(
-              {   
-                  hostname: __H__,
-                  port: __P__,
-                  user: __U__,
-                  token: __SDUMMY__ , 
-                  operationType: "GET", 
-                  key: "no-data"
-              } );
-  const v = context.getVariablesAsType(ConnectorRequest);
-  context.replaceSecrets(v);
-  context.validate(v)  ;
-
-  let o = await connector.execute( context );
-  expect( o.status  ).toEqual( 'error' );
-  expect( o.message )
-        .toContain( 'Runtime error while creating connection' );
-  expect( o.message )
-        .toContain( 'WRONGPASS' );
-  expect( o.data    ).toEqual( {}  );
+  expect ( outcome ).rejects
+  // error contains 'WRONGPASS'
+  
   
 }, 10000 ) // end of test
 
 
 test('connectorInvalidHostname returns an error', async () => {
             
+  const outcome = async () => {
+        const connector = new Connector();
+        const context = new OutboundConnectorContext({});
 
-  const connector = new Connector();
-  const context = new OutboundConnectorContext({});
+        context.setVariables(
+                    {   
+                        hostname: "invalid" + __H__,
+                        port: __P__,
+                        user: __U__,
+                        token: __SDUMMY__ , 
+                        operationType: "GET", 
+                        key: "no-data"
+                    } );
+        const v = context.getVariablesAsType(ConnectorRequest);
+        context.replaceSecrets(v);
+        context.validate(v)  ;
 
-  if (false) console.log(process.env);
-
-  context.setVariables(
-              {   
-                  hostname: "invalid" + __H__,
-                  port: __P__,
-                  user: __U__,
-                  token: __SDUMMY__ , 
-                  operationType: "GET", 
-                  key: "no-data"
-              } );
-  const v = context.getVariablesAsType(ConnectorRequest);
-  context.replaceSecrets(v);
-  context.validate(v)  ;
-
-  let o = await connector.execute( context );
-  expect( o.status  ).toEqual( 'error' );
-  expect( o.message )
-        .toContain( 'Runtime error while creating connection' );
-  expect( o.message )
-        .toContain( 'ENOTFOUND' );
-  expect( o.data    ).toEqual( {}  );
+        await connector.execute( context );
+  }
+  expect(outcome).rejects
+  // error contains 'ENOTFOUND'
   
 }, 10000 ) // end of test

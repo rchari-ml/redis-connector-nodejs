@@ -36,9 +36,6 @@ export class Connector implements OutboundConnectorFunction {
 
         this.redisClient = await createClient( { url : urlString } )
                         .on('error',        err => { console.log(Connector.LOG_IN_METHOD_CONN_HANDLER + 'connection error seen - ' + err); throw new Error('Ten20 Redis - connection error seen - ' + err); }    )
-                        .on('connect',      ()  =>   console.log(Connector.LOG_IN_METHOD_CONN_HANDLER + 'successfully connected'+'\n')        )
-                        .on('reconnecting', ()  =>   console.log(Connector.LOG_IN_METHOD_CONN_HANDLER + 'reconnecting')                )
-                        .on('ready',        ()  =>   console.log(Connector.LOG_IN_METHOD_CONN_HANDLER + 'is ready to serve requests' ) )
                         .connect();
 
         return this.redisClient
@@ -53,7 +50,19 @@ export class Connector implements OutboundConnectorFunction {
     async execute(context: OutboundConnectorContext) {
         const req = context.getVariablesAsType(ConnectorRequest)
         context.replaceSecrets(req)
-        return this.makeCall(req)
+
+        // apply business logic 
+        let output = await this.makeCall(req);
+
+        // ... and format response data
+        if (output.status  === Connector.STATUS_ERROR){
+            throw new Error( output.message );
+        } 
+
+        if (    output.status === Connector.STATUS_SUCCESS 
+            ||  output.status === Connector.STATUS_NODATA   ){
+            return output;
+        }         
     }
 
     async makeCall(req: ConnectorRequest) {
@@ -82,7 +91,7 @@ export class Connector implements OutboundConnectorFunction {
             console.log(Connector.LOG_IN_METHOD_MAKE_CALL + 'connection related error ', e);
             return { 
                 status  : Connector.STATUS_ERROR,
-                message : 'Runtime error while creating connection with req params ' + e,
+                message : 'Runtime error while creating connection ' + e,
                 data    : {}
             }            
         }
