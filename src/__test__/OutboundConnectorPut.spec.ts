@@ -82,3 +82,32 @@ test('putOperationForEmptyData correctly writes empty json object data to db', a
     expect( o ).toEqual( { status: 'success', message: 'success', data: 'OK' } );
     
 }, 10000 ) // end of test
+
+
+test('connectorInvalidHostname returns an error', async () => {
+            
+    const outcome = async () => {
+          const connector = new Connector();
+          const context = new OutboundConnectorContext({});
+  
+          context.setVariables(
+                      {   
+                          hostname: "invalid" + __H__,
+                          port: __P__,
+                          user: __U__,
+                          token: __SDUMMY__ , 
+                          operationType: "PUT", 
+                          key: "some-key",
+                          data: '{ id : 123 }'
+                      } );
+          const v = context.getVariablesAsType(ConnectorRequest);
+          context.replaceSecrets(v);
+          context.validate(v)  ;
+  
+          await connector.execute( context );
+    }
+    expect(outcome).rejects
+    // error contains 'ENOTFOUND'
+    
+  }, 10000 ) // end of test
+  

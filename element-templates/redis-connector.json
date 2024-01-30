@@ -139,6 +139,21 @@
     },
     "type" : "Text",
     "value": "makelabs"
+    }, {
+      "id" : "data",
+      "label" : "Data",
+      "optional" : true,
+      "constraints" : {
+        "notEmpty" : false
+      },
+      "feel" : "optional",
+      "group" : "compose",
+      "binding" : {
+        "name" : "data",
+        "type" : "zeebe:input"
+      },
+      "type" : "Text",
+      "value": ""    
   }, {
     "id" : "resultVariable",
     "label" : "Result variable",

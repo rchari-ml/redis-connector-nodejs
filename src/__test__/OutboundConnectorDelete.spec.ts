@@ -30,6 +30,31 @@ test('deleteOutboundConnectorDescription correctly retrieves Connector metadata'
 } )
 
 
+test('putOperationForEmptyDataInGetTesting correctly writes empty json object data to db', async () => {
+            
+    const connector = new Connector();
+    const context = new OutboundConnectorContext({});
+
+    context.setVariables(
+                {   
+                    hostname: __H__,
+                    port: __P__,
+                    user: __U__,
+                    token: __S__, 
+                    operationType: "PUT", 
+                    key: "makelabs-empty",
+                    data: '' // empty data
+                } );
+    const v = context.getVariablesAsType(ConnectorRequest);
+    context.replaceSecrets(v);
+    context.validate(v)  ;
+
+    let o = await connector.execute( context );
+    expect( o ).toEqual( { status: 'success', message: 'success', data: 'OK' } );
+    
+}, 10000 ) // end of test
+
+
 test('deleteOperationForSampleData correctly removes key from db', async () => {
             
             const connector = new Connector();
@@ -66,7 +91,7 @@ test('deleteOperationForNoKeyRecord returns nodata', async () => {
                     user: __U__,
                     token: __S__, 
                     operationType: "DELETE", 
-                    key: "makelabs-nokey"
+                    key: "makelabs-nokey-some-random"
                 } );
     const v = context.getVariablesAsType(ConnectorRequest);
     context.replaceSecrets(v);
@@ -76,3 +101,56 @@ test('deleteOperationForNoKeyRecord returns nodata', async () => {
     expect( o ).toEqual( { status: 'success', message: 'success', data: 0 } );
     
 }, 10000 ) // end of test
+
+
+test('deleteOperationForInvalidKey returns error', async () => {
+            
+    const connector = new Connector();
+    const context = new OutboundConnectorContext({});
+
+    context.setVariables(
+                {   
+                    hostname: __H__,
+                    port: __P__,
+                    user: __U__,
+                    token: __S__, 
+                    operationType: "DELETE", 
+                    key: "a!.@#$%^&*"
+                } );
+    const v = context.getVariablesAsType(ConnectorRequest);
+    context.replaceSecrets(v);
+    context.validate(v)  ;
+
+    let o = await connector.execute( context );
+    expect( o ).toEqual( { status: 'success', message: 'success', data: 0 } );
+    
+}, 10000 ) // end of test
+
+
+test('connectorInvalidHostname returns an error', async () => {
+            
+    const outcome = async () => {
+          const connector = new Connector();
+          const context = new OutboundConnectorContext({});
+  
+          context.setVariables(
+                      {   
+                          hostname: "invalid" + __H__,
+                          port: __P__,
+                          user: __U__,
+                          token: __SDUMMY__ , 
+                          operationType: "DELETE", 
+                          key: "some-key"
+                      } );
+          const v = context.getVariablesAsType(ConnectorRequest);
+          context.replaceSecrets(v);
+          context.validate(v)  ;
+  
+          await connector.execute( context );
+    }
+    expect(outcome).rejects
+    // error contains 'ENOTFOUND'
+    
+  }, 10000 ) // end of test
+  
+

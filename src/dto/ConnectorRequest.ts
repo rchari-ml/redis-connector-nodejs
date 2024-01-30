@@ -14,4 +14,6 @@ export class ConnectorRequest {
 
     data!: any;
 
+    resultVariable!: string;
+
 }
