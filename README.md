@@ -189,6 +189,8 @@ Note: I am taking db password as a secret parameter.
 
 # Common Issues
 Zeebe configuration and Redis configuration are the most common mistakes. Make sure spelling mistakes are avoided.
+>
+Ensure connector secret <code>secrets.REDIS_SECRET</code> is defined in your Camunda 8 environment.
 
 
 # References
